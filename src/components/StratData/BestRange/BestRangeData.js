@@ -6,7 +6,7 @@ import styles from "./BestRangeData.module.css";
 
 const BestRange = (props) => {
 
-    const capital = props.capital;
+    const capital = parseFloat(props.capital);
 
     const feesRange1 = parseFloat(props.range.range_1.fees);
     const feesRange2 = parseFloat(props.range.range_2.fees);
@@ -20,9 +20,9 @@ const BestRange = (props) => {
     const volumeRange2 = parseFloat(props.range.range_2.volume);
     const volumeRange3 = parseFloat(props.range.range_3.volume);
 
-    const tvl_simul_1 = 100 * capital / tvlRange1;
-    const tvl_simul_2 = 100 * capital / tvlRange2;
-    const tvl_simul_3 = 100 * capital / tvlRange3;
+    const tvl_simul_1 = 100 * capital / (tvlRange1 + capital);
+    const tvl_simul_2 = 100 * capital / (tvlRange2 + capital);
+    const tvl_simul_3 = 100 * capital / (tvlRange3 + capital);
 
     const fees_simul_1 = feesRange1 * tvl_simul_1 / 100;
     const fees_simul_2 = feesRange2 * tvl_simul_2 / 100;
