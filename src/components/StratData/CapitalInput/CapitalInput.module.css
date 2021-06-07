@@ -1,0 +1,16 @@
+.capital {
+    width: 30%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.input {
+    border-radius: 3px;
+    border: none;
+}
+
+.button {
+    background: linear-gradient(to top left, #0000ff 30%, #99ccff 100%);
+    color: #e6e6e6;
+    border-radius: 3px;
+}

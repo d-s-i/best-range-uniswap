@@ -1,0 +1,15 @@
+* {
+  box-sizing: border-box;
+}
+
+@font-face {
+  font-family: "Caviar Dreams";
+  src: url("./fonts/CaviarDreams.ttf") format("ttf");
+ }
+
+body {
+  font-family: "Caviar Dreams";
+  margin: 0% 22.5% 0% 22.5%;
+  background-color: #0d0d0d;
+  color: #e6e6e6;
+}

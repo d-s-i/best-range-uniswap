@@ -1,0 +1,20 @@
+.display-top-data {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 3%; 
+}
+
+.display-metrics {
+    display: flex;
+    justify-content: center;
+}
+
+.table {
+    border-collapse:separate;
+    border-spacing: 20px 0;
+}
+
+.pair-name {
+    font-size: 1.3em;
+}

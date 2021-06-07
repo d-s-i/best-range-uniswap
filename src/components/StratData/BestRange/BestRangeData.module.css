@@ -1,0 +1,14 @@
+.display-table {
+    display:flex;
+    justify-content: center;
+    margin-bottom: 3%;
+    width: 100%;
+}
+
+.left-table {
+    border-right: 1px white solid;
+}
+
+.data-simulation-table {
+    border-spacing: 40px 10px;
+}
