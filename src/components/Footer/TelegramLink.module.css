@@ -1,0 +1,41 @@
+.telegram-contact {
+    text-decoration: none;
+    color: #f2f2f2;
+}
+
+.telegram-contact:link {
+    text-decoration: none;
+}
+
+.telegram-contact:hover {
+    color: #333333;
+    box-shadow: white;
+}
+
+.telegram-contact:visited {
+    text-decoration: none;
+}
+
+.button {
+    background-color: #0088cc;
+    padding: 7% 15% 9% 15%;
+    border-radius: 20px;
+    border: none;
+    color: #e6e6e6;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.button:hover {
+    cursor: pointer;
+    background-color: #1ab2ff;
+    color: white;
+}
+
+.telegram-logo {
+    width: 17px;
+    height: auto;
+    margin-right: 7%;
+}

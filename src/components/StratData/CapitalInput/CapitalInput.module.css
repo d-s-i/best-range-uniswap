@@ -1,16 +1,35 @@
 .capital {
-    width: 30%;
+    width: 35%;
     display: flex;
     justify-content: space-between;
+    margin-bottom: 1.5%;
 }
 
 .input {
     border-radius: 3px;
     border: none;
+    background: #333333;
+    color: #e6e6e6;
+    padding: 1% 0% 1% 2%;
+}
+
+.input:focus {
+    outline: 1px #e6e6e6 solid;
+    /* box-shadow: 0 0 3pt 2pt #e6e6e6; */
+}
+
+.button-ok {
+    background: linear-gradient(to top right, #0000ff 20%, #00ffff 100%);
+    /* background: linear-gradient(to top left, #0000ff 30%, #99ccff 100%); */
 }
 
 .button {
-    background: linear-gradient(to top left, #0000ff 30%, #99ccff 100%);
     color: #e6e6e6;
     border-radius: 3px;
+    font-weight: bold;
+}
+
+.button-clear {
+    background: linear-gradient(to top right, #0000ff 30%, #ff00ff 100%);
+    /* background: linear-gradient(to top right, #00ffff 0%, #0000ff 100%); */
 }

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import styles from "./CapitalInput.module.css";
 
+import SimpleButton from "../../UI/SimpleButton";
+
 const CapitalInput = (props) => {
     const [capital, setCapital] = useState("");
     
@@ -9,11 +11,20 @@ const CapitalInput = (props) => {
         props.onUpdatingCapital(event.target.value);
     }
 
+    const clearHandler = () => {
+        setCapital("");
+        props.onUpdatingCapital("");
+    }
+
+    // The button is here for UI purposes but the function is not needed. Add onClick={updateCapital} to the "Ok" button to make it work
+    // const updateCapital = () => props.onUpdatingCapital(capital); 
+
     return (
         <div className={styles.capital} >
             <label htmlFor="capital" >Capital:</label>
-            <input className={styles.input} value={capital} type="number" id="tentacles" name="capital" onChange={capitalChangeHandler} ></input>
-            <button className={styles.button}>Ok</button>
+            <input className={styles.input} value={capital} type="number" id="capital" name="capital" onChange={capitalChangeHandler} ></input>
+            <SimpleButton className={styles["button-ok"]}>Ok</SimpleButton>
+            <SimpleButton className={styles["button-clear"]} onClick={clearHandler} >Clear</SimpleButton>
         </div>
     );
 }

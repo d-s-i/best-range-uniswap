@@ -6,7 +6,36 @@ import styles from "./BestRangeData.module.css";
 
 const BestRange = (props) => {
 
+    const _ = ""; // unused parameter
+
+    const returnATwoDecimalsNumber = (number) => parseFloat(number.toFixed(2));
+
+    const displayData = (type, data, unit, rangePosition) => {
+        if(type === "pool") return displayPoolData(data);
+        if(type === "range") return displayRange(data, rangePosition);
+        if(type === "simulation") return displayDataSimul(data, unit);
+    }
+    
+    const displayPoolData = (number) => {
+        if(number) return `$${number.toLocaleString("en")}`;
+        return " -- ";
+    }
+
+    const displayRange = (range, position) => `#${position} ~ ${range}`;
+
+    const displayDataSimul = (number, unit) =>  {
+        return unit === "$" ? `$${returnATwoDecimalsNumber(number) || " -- "}` : `${returnATwoDecimalsNumber(number) || " -- "}%`;
+    }
+
+    const calcNewTVL = (tvl) => 100 * capital / (tvl + capital);
+    const calcFees = (fees, tvl) => fees * tvl /100;
+    const calcApr = (fees) => (fees * 365 / capital) *100; 
+
     const capital = parseFloat(props.capital);
+
+    const range1 = props.range.range_1.range;
+    const range2 = props.range.range_2.range;
+    const range3 = props.range.range_3.range;
 
     const feesRange1 = parseFloat(props.range.range_1.fees);
     const feesRange2 = parseFloat(props.range.range_2.fees);
@@ -20,55 +49,60 @@ const BestRange = (props) => {
     const volumeRange2 = parseFloat(props.range.range_2.volume);
     const volumeRange3 = parseFloat(props.range.range_3.volume);
 
-    const tvl_simul_1 = 100 * capital / (tvlRange1 + capital);
-    const tvl_simul_2 = 100 * capital / (tvlRange2 + capital);
-    const tvl_simul_3 = 100 * capital / (tvlRange3 + capital);
+    const tvlSimul1 = calcNewTVL(tvlRange1);
+    const tvlSimul2 = calcNewTVL(tvlRange2);
+    const tvlSimul3 = calcNewTVL(tvlRange3);
 
-    const fees_simul_1 = feesRange1 * tvl_simul_1 / 100;
-    const fees_simul_2 = feesRange2 * tvl_simul_2 / 100;
-    const fees_simul_3 = feesRange3 * tvl_simul_3 / 100;
+    const feesSimul1 = calcFees(feesRange1, tvlSimul1 );
+    const feesSimul2 = calcFees(feesRange2, tvlSimul2 );
+    const feesSimul3 = calcFees(feesRange3, tvlSimul3);
 
-    const apr_range_1 = (fees_simul_1 * 365 / capital) * 100;
-    const apr_range_2 = (fees_simul_2 * 365 / capital) * 100;
-    const apr_range_3 = (fees_simul_3 * 365 / capital) * 100;
+    const aprRange1 = calcApr(feesSimul1);
+    const aprRange2 = calcApr(feesSimul2);
+    const aprRange3 = calcApr(feesSimul3);
 
     return (
         <div className={styles["display-table"]} >
             <Table 
                 tableTitle="Data"
                 column_1Title="Best Range" 
-                column_2Title="Fees (Daily)" 
+                column_2Title="Fees*" 
                 column_3Title="TVL" 
-                column_4Title="Volume"
-                column_1Line_1Data={`#1 ~ ${props.range.range_1.range}`}
-                column_2Line_1Data={`$${feesRange1.toLocaleString("en")}`}
-                column_3Line_1Data={`$${tvlRange1.toLocaleString("en")}`}
-                column_4Line_1Data={`$${volumeRange1.toLocaleString("en")}`}
-                column_1Line_2Data={`#1 ~ ${props.range.range_2.range}`}
-                column_2Line_2Data={`$${feesRange2.toLocaleString("en")}`}
-                column_3Line_2Data={`$${tvlRange2.toLocaleString("en")}`}
-                column_4Line_2Data={`$${volumeRange2.toLocaleString("en")}`}
-                column_1Line_3Data={`#1 ~ ${props.range.range_3.range}`}
-                column_2Line_3Data={`$${feesRange3.toLocaleString("en")}`}
-                column_3Line_3Data={`$${tvlRange3.toLocaleString("en")}`}
-                column_4Line_3Data={`$${volumeRange3.toLocaleString("en")}`}
+                column_4Title="Volume*"
+                column_1Line_1Data={displayData("range", range1, _, 1)}
+                column_2Line_1Data={displayData("pool", feesRange1)}
+                column_3Line_1Data={displayData("pool", tvlRange1)}
+                column_4Line_1Data={displayData("pool", volumeRange1)}
+                column_1Line_2Data={displayData("range", range2, _, 2)}
+                column_2Line_2Data={displayData("pool", feesRange2)}
+                column_3Line_2Data={displayData("pool", tvlRange2)}
+                column_4Line_2Data={displayData("pool", volumeRange2)}
+                column_1Line_3Data={displayData("range", range3, _, 3)}
+                column_2Line_3Data={displayData("pool", feesRange3)}
+                column_3Line_3Data={displayData("pool", tvlRange3)}
+                column_4Line_3Data={displayData("pool", volumeRange3)}
                 className={`${styles["left-table"]} ${styles["data-simulation-table"]}`}
+                classNameThead={"border-bottom"}
+                classNameTd={"cells"}
+                colSpan="4"
             />
             <Table 
-                tableTitle={`Simulation ($ ${capital})`} 
-                column_1Title="Fees (Daily)" 
+                tableTitle={`Simulation (${displayData("pool", capital)})`} 
+                column_1Title="Fees*" 
                 column_2Title="TVL" 
                 column_3Title="APR" 
-                column_1Line_1Data={`$${fees_simul_1.toFixed(2)}`}
-                column_2Line_1Data={`${tvl_simul_1.toFixed(2)} %`}
-                column_3Line_1Data={`${apr_range_1.toFixed(2)} %`}
-                column_1Line_2Data={`$${fees_simul_2.toFixed(2)}`}
-                column_2Line_2Data={`${tvl_simul_2.toFixed(2)} %`}
-                column_3Line_2Data={`${apr_range_2.toFixed(2)} %`}
-                column_1Line_3Data={`$${fees_simul_3.toFixed(2)}`}
-                column_2Line_3Data={`${tvl_simul_3.toFixed(2)} %`}
-                column_3Line_3Data={`${apr_range_3.toFixed(2)} %`}
+                column_1Line_1Data={displayData("simulation", feesSimul1, "$")}
+                column_2Line_1Data={displayData("simulation", tvlSimul1, "%")}
+                column_3Line_1Data={displayData("simulation", aprRange1, "%")}
+                column_1Line_2Data={displayData("simulation", feesSimul2, "$")}
+                column_2Line_2Data={displayData("simulation", tvlSimul2, "%")}
+                column_3Line_2Data={displayData("simulation", aprRange2, "%")}
+                column_1Line_3Data={displayData("simulation", feesSimul3, "$")}
+                column_2Line_3Data={displayData("simulation", tvlSimul3, "%")}
+                column_3Line_3Data={displayData("simulation", aprRange3, "%")}
                 className={`${styles["data-simulation-table"]}`}
+                classNameThead={"border-bottom"}
+                colSpan="3"
             />
         </div>
     );
