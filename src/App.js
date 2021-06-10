@@ -10,7 +10,7 @@ import SimpleButton from "./components/UI/SimpleButton";
 
 const App = () => {
 
-  const [data, setData] = useState([]);
+  const [pairData, setPairData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   async function fetchData() {
@@ -29,10 +29,10 @@ const App = () => {
             volumeUSD
           }
           token0 {
-            name
+            symbol
           }
           token1 {
-            name
+            symbol
           }
         }
       }
@@ -43,27 +43,50 @@ const App = () => {
     });
 
     const queryData = await client.query(tokensQuery).toPromise();
-
-    setIsLoading(false);
-
-    setData(queryData);
-    // console.log(queryData);
+    // console.log(queryData.data.pools[0]);
+    return queryData.data.pools[0];
   }
+
+  const displayNumbers0Decimals = (number) => parseFloat(number).toFixed(0);
 
   
-  async function fetchDataHandler() {
-    fetchData();
-    await console.log(data.data.pools[0].token0.name);
+  const fetchDataHandler = () => {
+    fetchData().then((response) => {
+      setPairData(previousValues => {
+        return [{
+          token0: response.token0.symbol,
+          token1: response.token1.symbol,
+          fees: displayNumbers0Decimals(response.poolDayData[2].volumeUSD * (response.feeTier / 10000)),
+          volume: displayNumbers0Decimals(response.poolDayData[2].volumeUSD),
+          tvl: displayNumbers0Decimals(response.totalValueLockedUSD),
+          ranges: {
+            range_1: {
+              range: "0.9996-1.0006",
+              fees: "5463",
+              tvl: "5642156",
+              volume: "2365142"
+            },
+            range_2: {
+              range: "0.9986-0.9996",
+              fees: "1652",
+              tvl: "2312547",
+              volume: "45621"
+            },
+            range_3: {
+              range: "0.9976-0.9986",
+              fees: "251",
+              tvl: "356412",
+              volume: "1301"
+            }
+          }
+        },
+      ...previousValues
+    ];
+      });
+      setIsLoading(false);
+    });
   }
-
-
-  // console.log("feeTier val", data);
-
-  // console.log("data", typeof(data));
-  // console.log("feeTier", typeof(data.feeTier));
-
-  // console.log((parseFloat(data.feeTier) / 10000) * parseFloat(data.totalValueLockedUSD));
-
+/*
     const pairData = [
       {
       token0: "DAI",
@@ -91,7 +114,7 @@ const App = () => {
           volume: "1301"
         }
       }
-      },
+      },      
       {
         token0: "USDC",
         token1: "USDT",
@@ -119,20 +142,13 @@ const App = () => {
           }
         }
         }
-    ];
-
-    
-
-    // const name0 = data.token0.name;
-    // const name1 = data.token1.name;
-    // console.log(name0, name1);
-    // const pairNames = pairData.map((pair) => [pair.name.slice(0, pair.name.indexOf("-")), pair.name.slice(pair.name.indexOf("-") + 1)]);
+    ]; */
 
   return (
     <React.Fragment>
       <Header />
       <SimpleButton onClick={fetchDataHandler}>Fecth Data</SimpleButton>
-      {!isLoading && pairData.map((pairData) => <StratData key={`${pairData.token0}-${pairData.token1}`} pairData={pairData} />)}
+      {!isLoading && pairData.map((pairData) => <StratData key={`${pairData.token0.name}-${pairData.token1.name}`} pairData={pairData} />)}
       {isLoading && <p>Loading</p>}
       <InfoHelper />
       <Footer />
