@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { createClient } from 'urql';
 
@@ -6,10 +6,15 @@ import Header from "./components/Header/Header";
 import StratData from "./components/StratData/StratData";
 import InfoHelper from "./components/StratData/InfoHelper";
 import Footer from "./components/Footer/Footer";
+import SimpleButton from "./components/UI/SimpleButton";
 
 const App = () => {
 
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
   async function fetchData() {
+
     const APIURL = "https://api.thegraph.com/subgraphs/name/benesjan/uniswap-v3-subgraph";
 
     const tokensQuery = `
@@ -37,15 +42,20 @@ const App = () => {
       url: APIURL
     });
 
-    const data = await client.query(tokensQuery).toPromise();
+    const queryData = await client.query(tokensQuery).toPromise();
 
-    // console.log(data.data.pools[0]);
-    return data.data.pools[0];
+    setIsLoading(false);
+
+    setData(queryData);
+    // console.log(queryData);
   }
 
-  const data = fetchData();
+  
+  async function fetchDataHandler() {
+    fetchData();
+    await console.log(data.data.pools[0].token0.name);
+  }
 
-  console.log(data);
 
   // console.log("feeTier val", data);
 
@@ -111,15 +121,19 @@ const App = () => {
         }
     ];
 
-    const name0 = data.token0.name;
-    const name1 = data.token1.name;
+    
+
+    // const name0 = data.token0.name;
+    // const name1 = data.token1.name;
     // console.log(name0, name1);
     // const pairNames = pairData.map((pair) => [pair.name.slice(0, pair.name.indexOf("-")), pair.name.slice(pair.name.indexOf("-") + 1)]);
 
   return (
     <React.Fragment>
       <Header />
-      {pairData.map((pairData) => <StratData key={`${pairData.token0}-${pairData.token1}`} pairData={pairData} />)}
+      <SimpleButton onClick={fetchDataHandler}>Fecth Data</SimpleButton>
+      {!isLoading && pairData.map((pairData) => <StratData key={`${pairData.token0}-${pairData.token1}`} pairData={pairData} />)}
+      {isLoading && <p>Loading</p>}
       <InfoHelper />
       <Footer />
     </React.Fragment>
