@@ -59,18 +59,22 @@ const App = () => {
   const formatNumbers0Decimals = (number) => Math.trunc(parseFloat(number));
 
   const formatNumber4DecimalsRoundDown = (number) => Math.floor(number * 10000) / 10000;
+
+  const calcLowerTick = (tickIdx, decimalsDiff) =>  BigNumber(1.0001**(tickIdx)) * BigNumber(10**(decimalsDiff));
+  const calcUpperTick = (tickIdx, decimalsDiff) => 1.0001**(parseFloat(tickIdx) + 10) * BigNumber(10**(decimalsDiff));
+  const calcTvl = (liquidity) => BigNumber(liquidity) / BigNumber(10**15);
   
   const fetchDataHandler = () => {
     fetchData().then((response) => {
 
       const decimalsDiff = Math.abs(parseFloat(response.pools[0].token0.decimals) - parseFloat(response.pools[0].token1.decimals));
 
-      const lowerTickDAI1 = BigNumber(1.0001**(response.ticks[0].tickIdx)) * BigNumber(10**(decimalsDiff));
-      const upperTickDAI1 = 1.0001**(parseFloat(response.ticks[0].tickIdx) + 10) * BigNumber(10**(decimalsDiff));
-      const lowerTickDAI2 = BigNumber(1.0001**(response.ticks[1].tickIdx)) * BigNumber(10**(decimalsDiff));
-      const upperTickDAI2 = 1.0001**(parseFloat(response.ticks[1].tickIdx) + 10) * BigNumber(10**(decimalsDiff));
-      const lowerTickDAI3 = BigNumber(1.0001**(response.ticks[2].tickIdx)) * BigNumber(10**(decimalsDiff));
-      const upperTickDAI3 = 1.0001**(parseFloat(response.ticks[2].tickIdx) + 10) * BigNumber(10**(decimalsDiff));
+      const lowerTickDAI1 = calcLowerTick(response.ticks[0].tickIdx, decimalsDiff);
+      const upperTickDAI1 = calcUpperTick(response.ticks[0].tickIdx,decimalsDiff);
+      const lowerTickDAI2 = calcLowerTick(response.ticks[1].tickIdx, decimalsDiff);;
+      const upperTickDAI2 = calcUpperTick(response.ticks[1].tickIdx,decimalsDiff);
+      const lowerTickDAI3 = calcLowerTick(response.ticks[2].tickIdx, decimalsDiff);;
+      const upperTickDAI3 = calcUpperTick(response.ticks[2].tickIdx,decimalsDiff);
       
       const lowerTickUSDT1 = 1.0001 / lowerTickDAI1;
       const upperTickUSDT1 = 1.0001 / upperTickDAI1;
@@ -79,9 +83,9 @@ const App = () => {
       const lowerTickUSDT3 = 1.0001 / lowerTickDAI3;
       const upperTickUSDT3 = 1.0001 / upperTickDAI3;
       
-      const tvl1 = BigNumber(response.ticks[0].liquidityGross) / BigNumber(10**15);
-      const tvl2 = BigNumber(response.ticks[1].liquidityGross) / BigNumber(10**15);
-      const tvl3 = BigNumber(response.ticks[2].liquidityGross) / BigNumber(10**15);
+      const tvl1 = calcTvl(response.ticks[0].liquidityGross);
+      const tvl2 = calcTvl(response.ticks[1].liquidityGross);
+      const tvl3 = calcTvl(response.ticks[2].liquidityGross);
 
       setPairData(previousValues => {
         return [{
