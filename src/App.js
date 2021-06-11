@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
 import { createClient } from 'urql';
+import { BigNumber } from "bignumber.js";
 
 import Header from "./components/Header/Header";
 import StratData from "./components/StratData/StratData";
@@ -15,67 +16,98 @@ const App = () => {
 
   async function fetchData() {
 
-    const APIURL = "https://api.thegraph.com/subgraphs/name/benesjan/uniswap-v3-subgraph";
+    setIsLoading(true);
+
+    const APIURL = "https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-testing";
 
     const tokensQuery = `
       query {
-        pools(where: {
+        pools(where: { 
           token0: "0x6b175474e89094c44da98b954eedeac495271d0f"
           token1: "0xdac17f958d2ee523a2206206994597c13d831ec7"
         }) {
+          id
           feeTier
           totalValueLockedUSD
-          poolDayData {
+          poolDayData (first:1, orderBy:date, orderDirection: desc, skip: 1) {
             volumeUSD
           }
           token0 {
             symbol
+            decimals
           }
           token1 {
             symbol
+            decimals
           }
+        }
+        ticks(first:5, where: {
+          pool: "0x6f48eca74b38d2936b02ab603ff4e36a6c0e3a77"
+        }, orderBy: liquidityGross, orderDirection: desc) {
+          liquidityGross
+          tickIdx
         }
       }
     `
 
-    const client = createClient({
-      url: APIURL
-    });
+    const client = createClient({url: APIURL});
 
     const queryData = await client.query(tokensQuery).toPromise();
-    // console.log(queryData.data.pools[0]);
-    return queryData.data.pools[0];
+    return queryData.data;
   }
 
-  const displayNumbers0Decimals = (number) => parseFloat(number).toFixed(0);
+  const formatNumbers0Decimals = (number) => Math.trunc(parseFloat(number));
 
+  const formatNumber4DecimalsRoundDown = (number) => Math.floor(number * 10000) / 10000;
   
   const fetchDataHandler = () => {
     fetchData().then((response) => {
+
+      const decimalsDiff = Math.abs(parseFloat(response.pools[0].token0.decimals) - parseFloat(response.pools[0].token1.decimals));
+
+      const lowerTickDAI1 = BigNumber(1.0001**(response.ticks[0].tickIdx)) * BigNumber(10**(decimalsDiff));
+      const upperTickDAI1 = 1.0001**(parseFloat(response.ticks[0].tickIdx) + 10) * BigNumber(10**(decimalsDiff));
+      const lowerTickDAI2 = BigNumber(1.0001**(response.ticks[1].tickIdx)) * BigNumber(10**(decimalsDiff));
+      const upperTickDAI2 = 1.0001**(parseFloat(response.ticks[1].tickIdx) + 10) * BigNumber(10**(decimalsDiff));
+      const lowerTickDAI3 = BigNumber(1.0001**(response.ticks[2].tickIdx)) * BigNumber(10**(decimalsDiff));
+      const upperTickDAI3 = 1.0001**(parseFloat(response.ticks[2].tickIdx) + 10) * BigNumber(10**(decimalsDiff));
+      
+      const lowerTickUSDT1 = 1.0001 / lowerTickDAI1;
+      const upperTickUSDT1 = 1.0001 / upperTickDAI1;
+      const lowerTickUSDT2 = 1.0001 / lowerTickDAI2;
+      const upperTickUSDT2 = 1.0001 / upperTickDAI2;
+      const lowerTickUSDT3 = 1.0001 / lowerTickDAI3;
+      const upperTickUSDT3 = 1.0001 / upperTickDAI3;
+      
+      const tvl1 = BigNumber(response.ticks[0].liquidityGross) / BigNumber(10**15);
+      const tvl2 = BigNumber(response.ticks[1].liquidityGross) / BigNumber(10**15);
+      const tvl3 = BigNumber(response.ticks[2].liquidityGross) / BigNumber(10**15);
+
       setPairData(previousValues => {
         return [{
-          token0: response.token0.symbol,
-          token1: response.token1.symbol,
-          fees: displayNumbers0Decimals(response.poolDayData[2].volumeUSD * (response.feeTier / 10000)),
-          volume: displayNumbers0Decimals(response.poolDayData[2].volumeUSD),
-          tvl: displayNumbers0Decimals(response.totalValueLockedUSD),
+          id: response.pools[0].id,
+          token0: response.pools[0].token0.symbol,
+          token1: response.pools[0].token1.symbol,
+          fees: formatNumbers0Decimals(response.pools[0].poolDayData[0].volumeUSD * (response.pools[0].feeTier / 10000) / 100),
+          volume: formatNumbers0Decimals(response.pools[0].poolDayData[0].volumeUSD),
+          tvl: formatNumbers0Decimals(response.pools[0].totalValueLockedUSD),
           ranges: {
             range_1: {
-              range: "0.9996-1.0006",
-              fees: "5463",
-              tvl: "5642156",
+              range: `${formatNumber4DecimalsRoundDown(lowerTickUSDT1)}-${formatNumber4DecimalsRoundDown(upperTickUSDT1)}`,
+              fees: "10",
+              tvl: `${Math.trunc(tvl1)}`,
               volume: "2365142"
             },
             range_2: {
-              range: "0.9986-0.9996",
+              range: `${formatNumber4DecimalsRoundDown(lowerTickUSDT2)}-${formatNumber4DecimalsRoundDown(upperTickUSDT2)}`,
               fees: "1652",
-              tvl: "2312547",
+              tvl: `${Math.trunc(tvl2)}`,
               volume: "45621"
             },
             range_3: {
-              range: "0.9976-0.9986",
+              range: `${formatNumber4DecimalsRoundDown(lowerTickUSDT3)}-${formatNumber4DecimalsRoundDown(upperTickUSDT3)}`,
               fees: "251",
-              tvl: "356412",
+              tvl: `${Math.trunc(tvl3)}`,
               volume: "1301"
             }
           }
@@ -86,69 +118,12 @@ const App = () => {
       setIsLoading(false);
     });
   }
-/*
-    const pairData = [
-      {
-      token0: "DAI",
-      token1 : "USDT",
-      fees: `15684`,
-      tvl: "36542145",
-      volume: "12489564",
-      ranges: {
-        range_1: {
-          range: "0.9996-1.0006",
-          fees: "5463",
-          tvl: "5642156",
-          volume: "2365142"
-        },
-        range_2: {
-          range: "0.9986-0.9996",
-          fees: "1652",
-          tvl: "2312547",
-          volume: "45621"
-        },
-        range_3: {
-          range: "0.9976-0.9986",
-          fees: "251",
-          tvl: "356412",
-          volume: "1301"
-        }
-      }
-      },      
-      {
-        token0: "USDC",
-        token1: "USDT",
-        fees: "31658",
-        tvl: "145214784",
-        volume: "34521789" ,
-        ranges: {
-          range_1: {
-            range: "0.999-1.001",
-            fees: "10245",
-            tvl: "32154895",
-            volume: "4523447"
-          },
-          range_2: {
-            range: "0.998-0.999",
-            fees: "3258",
-            tvl: "11298365",
-            volume: "1748552"
-          },
-          range_3: {
-            range: "1.001-1.002",
-            fees: "1244",
-            tvl: "624147",
-            volume: "147852"
-          }
-        }
-        }
-    ]; */
 
   return (
     <React.Fragment>
       <Header />
       <SimpleButton onClick={fetchDataHandler}>Fecth Data</SimpleButton>
-      {!isLoading && pairData.map((pairData) => <StratData key={`${pairData.token0.name}-${pairData.token1.name}`} pairData={pairData} />)}
+      {!isLoading && pairData.map((pairData) => <StratData key={`${pairData.id}`} pairData={pairData} />)}
       {isLoading && <p>Loading</p>}
       <InfoHelper />
       <Footer />

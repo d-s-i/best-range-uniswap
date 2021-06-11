@@ -18,4 +18,15 @@
 
 .pair-name {
     font-size: 1.3em;
+    text-decoration: none;
 }
+
+.pair-name:visited{
+    text-decoration: none;
+    color: inherit;
+}
+
+.pair-name:hover {
+    cursor: pointer;
+}
+

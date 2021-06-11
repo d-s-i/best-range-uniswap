@@ -4,7 +4,7 @@ import Table from "./Table/Table";
 
 import styles from "./GeneralPairData.module.css";
 
-const DisplayPairData = (props) => {
+const GeneralPairData = (props) => {
 
     const displayMetrics = (number) => {
         if(number) return `$${parseFloat(number).toLocaleString("en")}`;
@@ -13,7 +13,7 @@ const DisplayPairData = (props) => {
 
     return (
         <div className={styles["display-top-data"]} >
-            <div className={styles["pair-name"]} >{props.name}</div>
+            <a className={styles["pair-name"]} href={`https://info.uniswap.org/#/pools/${props.id}`} title={`https://info.uniswap.org/#/pools/${props.id}`} target="_blank" rel="noopener noreferrer">{props.name}</a>
             <div className={styles["display-metrics"]}>
                 <Table 
                 colSpan={0}
@@ -30,4 +30,4 @@ const DisplayPairData = (props) => {
     );
 }
 
-export default DisplayPairData;
+export default GeneralPairData;
