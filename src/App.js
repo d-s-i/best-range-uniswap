@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { queryToken, queryTicks, queryPool, fetchData } from "./external-functions/queries";
+import { queryToken, queryPool, fetchData } from "./external-functions/queries";
 import { BigNumber } from "bignumber.js";
 
 import Header from "./components/Header/Header";

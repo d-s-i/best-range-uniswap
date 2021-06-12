@@ -20,7 +20,7 @@ export async function queryToken(tokenSymbol) {
     return queryData.data.tokens[0].id;
   }
 
-  export async function queryPool(token0Id, token1Id) {
+export async function queryPool(token0Id, token1Id) {
 
     const tokensQuery = `
     query {
@@ -35,9 +35,9 @@ export async function queryToken(tokenSymbol) {
 
   const queryData = await client.query(tokensQuery).toPromise();
   return queryData.data.pools[0].id;
-  }
+}
 
-  export async function fetchData(poolAddress) {
+export async function fetchData(poolAddress) {
 
     const tokensQuery = `
       query {
@@ -70,21 +70,4 @@ export async function queryToken(tokenSymbol) {
 
     const queryData = await client.query(tokensQuery).toPromise();
     return queryData.data;
-  }
-
-  export async function queryTicks(poolAddress) {
-
-    const tokensQuery = `
-      query {
-        ticks(first:5, where: {
-          pool: "${poolAddress}"
-        }, orderBy: liquidityGross, orderDirection: desc) {
-          liquidityGross
-          tickIdx
-        }
-      }
-    `
-
-    const queryData = await client.query(tokensQuery).toPromise();
-    return queryData.data.ticks;
-  }
+}
