@@ -1,0 +1,10 @@
+.display-user-input {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 5%;  
+}
+
+.button-ok {
+    background: linear-gradient(to top right, #0000ff 20%, #00ffff 100%);
+    /* background: linear-gradient(to top left, #0000ff 30%, #99ccff 100%); */
+}

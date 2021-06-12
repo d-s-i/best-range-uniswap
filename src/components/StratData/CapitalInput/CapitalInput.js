@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styles from "./CapitalInput.module.css";
 
 import SimpleButton from "../../UI/SimpleButton";
+import Input from "../../UI/Input";
 
 const CapitalInput = (props) => {
     const [capital, setCapital] = useState("");
@@ -22,7 +23,7 @@ const CapitalInput = (props) => {
     return (
         <div className={styles.capital} >
             <label htmlFor="capital" >Capital:</label>
-            <input className={styles.input} value={capital} type="number" id="capital" name="capital" onChange={capitalChangeHandler} ></input>
+            <Input value={capital} type="number" id="capital" name="capital" onChange={capitalChangeHandler} />
             <SimpleButton className={styles["button-ok"]}>Ok</SimpleButton>
             <SimpleButton className={styles["button-clear"]} onClick={clearHandler} >Clear</SimpleButton>
         </div>
