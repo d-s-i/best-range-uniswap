@@ -18,9 +18,9 @@ const GeneralPairData = (props) => {
                 <Table 
                 colSpan={0}
                 tableTitle="" 
-                column_1Title="Fees" 
+                column_1Title="Fees*" 
                 column_2Title="TVL" 
-                column_3Title="Volume" 
+                column_3Title="Volume*" 
                 column_1Line_1Data={displayMetrics(props.fees)}
                 column_2Line_1Data={displayMetrics(props.tvl)}
                 column_3Line_1Data={displayMetrics(props.volume)}
