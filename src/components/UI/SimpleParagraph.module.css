@@ -15,4 +15,6 @@
     border-right: 3px #595959 solid;
     border-radius: 3px;
     display: flex;
+    justify-content: center;
+    padding-left: 3%;
 }
