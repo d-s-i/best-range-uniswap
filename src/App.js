@@ -117,11 +117,24 @@ const App = () => {
     }).catch(error => setIsError(() => [true, `${error}`]));
   }
 
+  const deletePairHandler = (id) => {
+    const idToDelete = pairData.map((pair) => pair.id).indexOf(id); 
+    if (idToDelete === 0) {
+      const newState = pairData.slice(1, pairData.length);
+      return setPairData(newState);
+    }
+    if(pairData.length > 1) {
+      const newState = pairData.slice(0, idToDelete).concat(pairData.slice(idToDelete, -1));
+      return setPairData(newState);
+    }
+      setIsLoading(true);
+  }
+
   return (
     <React.Fragment>
       <Header />
       <PairInput onQueryingPairData={queryPairData} />
-      {!isLoading && pairData.map((pairData) => <StratData key={`${pairData.id}`} pairData={pairData} />)}
+      {!isLoading && pairData.map((pairData) => <StratData key={`${pairData.id}`} pairData={pairData} onDelete={deletePairHandler} />)}
       {isLoading && !isError[0] && <SimpleParagraph mainText="Start querying data now" subText="(ex: token0 - DAI / token1 - USDC)" />}
       {isError[0] && <SimpleParagraph mainText={isError[1]} className="error" />}
       {!isLoading && <InfoHelper />}

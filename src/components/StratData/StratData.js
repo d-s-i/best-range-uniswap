@@ -17,7 +17,15 @@ const StratData = (props) => {
     
     return (
         <Card>
-            <GeneralPairData key={props.pairData.id} name={pairName} id={props.pairData.id} fees={props.pairData.fees} tvl={props.pairData.tvl} volume={props.pairData.volume}/>
+            <GeneralPairData 
+            key={props.pairData.id} 
+            name={pairName} 
+            id={props.pairData.id} 
+            fees={props.pairData.fees} 
+            tvl={props.pairData.tvl} 
+            volume={props.pairData.volume}
+            onDelete={props.onDelete}
+            />
             <TradingViewWidget 
             symbol={`BINANCEUS:${props.pairData.token0}USD/BINANCEUS:${props.pairData.token1}USD`} 
             theme={Themes.DARK} 

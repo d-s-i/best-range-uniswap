@@ -2,9 +2,15 @@
     color: #e6e6e6;
     border-radius: 3px;
     font-weight: bold;
-    background-color: grey;
+}
+
+.delete-button {
+    background: red;
 }
 
 .button:hover {
     cursor: pointer;
 }
+
+
+
