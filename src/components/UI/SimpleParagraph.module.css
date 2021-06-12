@@ -7,3 +7,14 @@
 .sub-text {
     color: #666666;
 }
+
+.error {
+    color: #cc0000;
+    background: #1a1a1a;
+    border-bottom: 3px #404040 solid;
+    border-right: 3px #595959 solid;
+    border-radius: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

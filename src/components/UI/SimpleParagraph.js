@@ -3,10 +3,10 @@ import styles from "./SimpleParagraph.module.css";
 
 const SimpleParagraph = (props) => {
     return(
-        <React.Fragment>
+        <div className={styles[`${props.className}`]} >
             <p className={styles.paragraph} >{props.mainText}</p>
-            <p className={`${styles["sub-text"]} ${styles.paragraph}` } >{props.subText}</p>
-        </React.Fragment>
+            <p className={`${styles["sub-text"]} ${styles.paragraph}` }>{props.subText}</p>
+        </div>
     );
 }
 

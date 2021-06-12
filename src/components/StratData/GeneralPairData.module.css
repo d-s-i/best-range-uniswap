@@ -28,7 +28,7 @@
 
 .pair-name:hover {
     cursor: pointer;
-    padding: 0.1% 0.5% 0.1% 1%;
+    padding: 0.1% 0.5% 0.1% 0.5%;
     /* font-weight: bold; */
     background-color: #1a1a1a;
     border-bottom: 3px #404040 solid; 

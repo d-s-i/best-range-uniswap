@@ -21,6 +21,8 @@ const PairInput = (props) => {
         const token0Symbol = enteredToken0
         const token1Symbol = enteredToken1;
         props.onQueryingPairData(token0Symbol, token1Symbol);
+        setToken0Symbol("");
+        setToken1Symbol("");
     }
 
     return (

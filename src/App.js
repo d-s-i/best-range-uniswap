@@ -14,10 +14,11 @@ const App = () => {
 
   const [pairData, setPairData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState([false, ""]);
 
   let addressToken0; // temporarly stored token0 address
   let addressToken1; // temporarly stored token1 address
-  let decimalsDiff; // temporarly stored decimals difference between token0 and token 1
+  let decimalsDiff; // temporarly stored decimals difference between token0 and token 1 used for price calculations
 
   const formatNumbers0Decimals = (number) => Math.trunc(parseFloat(number));
 
@@ -27,17 +28,35 @@ const App = () => {
   const calcUpperTick = (tickIdx, decimalsDiff) => 1.0001**(parseFloat(tickIdx) + 10) * BigNumber(10**(decimalsDiff));
   const calcTvl = (liquidity) => BigNumber(liquidity) / BigNumber(10**15);
 
+  const isPoolDisplayed = (poolAddress) => pairData.map(pair => pair.id).includes(poolAddress) ? true : false;
+  const handlerTokenNotFound = (responseArray) => {
+    if(responseArray.length === 0 ) throw new Error("One of the token hasn't been found. Make sure tokens are rightly written in CAPS if needed (see Uniswap pool).");
+  }
+  const handlerPoolNotFound = (poolAddress) => {
+    if (poolAddress.length === 0) throw new Error("This pool doesn't exist. Make sure the pool exist and that your token0 is indeed token0 and not token1 or vice versa.");
+  }
+
   const queryPairData = (token0, token1) => {
 
     setIsLoading(true);
 
-    queryToken(token0).then((response) => {
-      addressToken0 = response;
+    queryToken(token0)
+    .then((response) => {
+      handlerTokenNotFound(response.tokens);
+      addressToken0 = response.tokens[0].id;
       return queryToken(token1);
     })
-    .then((response) => addressToken1 = response)
-    .then(() => queryPool(addressToken0, addressToken1))
-    .then((response) => fetchData(response))
+    .then((response) => {
+      handlerTokenNotFound(response.tokens);
+      addressToken1 = response.tokens[0].id;
+    }).then(() => {
+      return queryPool(addressToken0, addressToken1);
+    })
+    .then((response) => {
+      handlerPoolNotFound(response.pools);
+      if(isPoolDisplayed(response.pools)) throw new Error("You already queried this pool");
+      return fetchData(response.pools[0].id);
+    })
     .then((response) => {
 
       decimalsDiff = Math.abs(parseFloat(response.pools[0].token0.decimals) - parseFloat(response.pools[0].token1.decimals));
@@ -55,7 +74,6 @@ const App = () => {
       const upperTickUSDT2 = 1.0001 / upperTickDAI2;
       const lowerTickUSDT3 = 1.0001 / lowerTickDAI3;
       const upperTickUSDT3 = 1.0001 / upperTickDAI3;
-
       
       const tvl1 = calcTvl(response.ticks[0].liquidityGross);
       const tvl2 = calcTvl(response.ticks[1].liquidityGross);
@@ -94,8 +112,9 @@ const App = () => {
       ...previousData]);
 
       setIsLoading(false);
+      setIsError(() => [false, ""]);
 
-    });
+    }).catch(error => setIsError(() => [true, `${error}`]));
   }
 
   return (
@@ -103,7 +122,8 @@ const App = () => {
       <Header />
       <PairInput onQueryingPairData={queryPairData} />
       {!isLoading && pairData.map((pairData) => <StratData key={`${pairData.id}`} pairData={pairData} />)}
-      {isLoading && <SimpleParagraph mainText="Start querying data now" subText="(ex: token0 - DAI / token1 - USDC)" />}
+      {isLoading && !isError[0] && <SimpleParagraph mainText="Start querying data now" subText="(ex: token0 - DAI / token1 - USDC)" />}
+      {isError[0] && <SimpleParagraph mainText={isError[1]} className="error" />}
       {!isLoading && <InfoHelper />}
       <Footer />
     </React.Fragment>

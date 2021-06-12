@@ -17,7 +17,7 @@ export async function queryToken(tokenSymbol) {
     `
 
     const queryData = await client.query(tokensQuery).toPromise();
-    return queryData.data.tokens[0].id;
+    return queryData.data;
   }
 
 export async function queryPool(token0Id, token1Id) {
@@ -34,7 +34,7 @@ export async function queryPool(token0Id, token1Id) {
   `
 
   const queryData = await client.query(tokensQuery).toPromise();
-  return queryData.data.pools[0].id;
+  return queryData.data;
 }
 
 export async function fetchData(poolAddress) {
