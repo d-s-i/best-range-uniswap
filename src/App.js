@@ -13,8 +13,9 @@ import SimpleParagraph from "./components/UI/SimpleParagraph";
 const App = () => {
 
   const [pairData, setPairData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState([false, ""]);
+  const [isWelcome, setIsWelcome] = useState(true);
 
   let addressToken0; // temporarly stored token0 address
   let addressToken1; // temporarly stored token1 address
@@ -112,6 +113,7 @@ const App = () => {
       ...previousData]);
 
       setIsLoading(false);
+      setIsWelcome(false);
       setIsError(() => [false, ""]);
 
     }).catch(error => setIsError(() => [true, `${error}`]));
@@ -121,13 +123,13 @@ const App = () => {
     const idToDelete = pairData.map((pair) => pair.id).indexOf(id); 
     if (idToDelete === 0) {
       const newState = pairData.slice(1, pairData.length);
+      newState.length === 0 && setIsWelcome(true);
       return setPairData(newState);
     }
     if(pairData.length > 1) {
       const newState = pairData.slice(0, idToDelete).concat(pairData.slice(idToDelete, -1));
       return setPairData(newState);
     }
-      setIsLoading(true);
   }
 
   return (
@@ -135,9 +137,10 @@ const App = () => {
       <Header />
       <PairInput onQueryingPairData={queryPairData} />
       {!isLoading && pairData.map((pairData) => <StratData key={`${pairData.id}`} pairData={pairData} onDelete={deletePairHandler} />)}
-      {isLoading && !isError[0] && <SimpleParagraph mainText="Start querying data now" subText="(ex: token0 - DAI / token1 - USDC)" />}
+      {isWelcome && !isError[0] && <SimpleParagraph mainText="Start querying data now" subText="(ex: token0 - DAI / token1 - USDC)" />}
+      {isLoading && !isError[0] && <SimpleParagraph mainText="Loading" subText="Wait a few seconds ..." />}
       {isError[0] && <SimpleParagraph mainText={isError[1]} className="error" />}
-      {!isLoading && <InfoHelper />}
+      {!isLoading && !isWelcome && <InfoHelper />}
       <Footer />
     </React.Fragment>
   );
