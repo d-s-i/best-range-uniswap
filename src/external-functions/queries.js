@@ -20,13 +20,29 @@ export async function queryToken(tokenSymbol) {
     return queryData.data.tokens[0].id;
   }
 
-  export async function fetchData(token0Id, token1Id) {
+  export async function queryPool(token0Id, token1Id) {
+
+    const tokensQuery = `
+    query {
+      pools(first:1, where: {
+        token0: "${token0Id}"
+        token1: "${token1Id}"
+      }, orderBy: volumeUSD, orderDirection: desc) {
+        id
+      }
+    }
+  `
+
+  const queryData = await client.query(tokensQuery).toPromise();
+  return queryData.data.pools[0].id;
+  }
+
+  export async function fetchData(poolAddress) {
 
     const tokensQuery = `
       query {
         pools(where: { 
-          token0: "${token0Id}"
-          token1: "${token1Id}"
+          id: "${poolAddress}"
         }, orderBy: volumeUSD, orderDirection: desc) {
           id
           feeTier
@@ -42,6 +58,12 @@ export async function queryToken(tokenSymbol) {
             symbol
             decimals
           }
+        }
+        ticks(first:5, where: {
+          pool: "${poolAddress}"
+        }, orderBy: liquidityGross, orderDirection: desc) {
+          liquidityGross
+          tickIdx
         }
       }
     `
