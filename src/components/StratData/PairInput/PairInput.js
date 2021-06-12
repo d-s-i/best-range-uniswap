@@ -20,7 +20,7 @@ const PairInput = (props) => {
     const fetchData = () => {
         const token0Symbol = enteredToken0
         const token1Symbol = enteredToken1;
-        props.onQueryingToken(token0Symbol, token1Symbol);
+        props.onQueryingPairData(token0Symbol, token1Symbol);
     }
 
     return (

@@ -6,7 +6,7 @@ import styles from "./BestRangeData.module.css";
 
 const BestRange = (props) => {
 
-    const _ = ""; // unused parameter
+    const _ = ""; // for unused parameter
 
     const returnATwoDecimalsNumber = (number) => parseFloat(number.toFixed(2));
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { createClient } from 'urql';
+import { queryToken, queryTicks, fetchData } from "./external-functions/queries";
 import { BigNumber } from "bignumber.js";
 
 import Header from "./components/Header/Header";
@@ -8,17 +8,16 @@ import StratData from "./components/StratData/StratData";
 import InfoHelper from "./components/StratData/InfoHelper";
 import Footer from "./components/Footer/Footer";
 import PairInput from "./components/StratData/PairInput/PairInput";
+import SimpleParagraph from "./components/UI/SimpleParagraph";
 
 const App = () => {
-
-  const APIURL = "https://api.thegraph.com/subgraphs/name/ianlapham/uniswap-v3-testing";
 
   const [pairData, setPairData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  let addressToken0;
-  let addressToken1;
-  let decimalsDiff;
+  let addressToken0; // temporarly stored token0 address
+  let addressToken1; // temporarly stored token1 address
+  let decimalsDiff; // temporarly stored decimals difference between token0 and token 1
 
   const formatNumbers0Decimals = (number) => Math.trunc(parseFloat(number));
 
@@ -28,80 +27,10 @@ const App = () => {
   const calcUpperTick = (tickIdx, decimalsDiff) => 1.0001**(parseFloat(tickIdx) + 10) * BigNumber(10**(decimalsDiff));
   const calcTvl = (liquidity) => BigNumber(liquidity) / BigNumber(10**15);
 
-  async function queryToken(tokenSymbol) {
+  const queryPairData = (token0, token1) => {
 
     setIsLoading(true);
 
-    const tokensQuery = `
-      query {
-        tokens(first:1, where: {
-          symbol: "${tokenSymbol}"
-        }, orderBy: volumeUSD, orderDirection: desc) {
-          id
-        }
-      }
-    `
-
-    const client = createClient({url: APIURL});
-
-    const queryData = await client.query(tokensQuery).toPromise();
-    return queryData.data.tokens[0].id;
-  }
-
-  async function fetchData(token0Id, token1Id) {
-
-    const tokensQuery = `
-      query {
-        pools(where: { 
-          token0: "${token0Id}"
-          token1: "${token1Id}"
-        }, orderBy: volumeUSD, orderDirection: desc) {
-          id
-          feeTier
-          totalValueLockedUSD
-          poolDayData (first:1, orderBy:date, orderDirection: desc, skip: 1) {
-            volumeUSD
-          }
-          token0 {
-            symbol
-            decimals
-          }
-          token1 {
-            symbol
-            decimals
-          }
-        }
-      }
-    `
-
-    const client = createClient({url: APIURL});
-
-    const queryData = await client.query(tokensQuery).toPromise();
-    return queryData.data;
-  }
-
-  async function queryTicks(poolAddress) {
-
-    setIsLoading(true);
-
-    const tokensQuery = `
-      query {
-        ticks(first:5, where: {
-          pool: "${poolAddress}"
-        }, orderBy: liquidityGross, orderDirection: desc) {
-          liquidityGross
-          tickIdx
-        }
-      }
-    `
-
-    const client = createClient({url: APIURL});
-
-    const queryData = await client.query(tokensQuery).toPromise();
-    return queryData.data.ticks;
-  }
-
-  const queryTokens = (token0, token1) => {
     queryToken(token0).then((response) => {
       addressToken0 = response;
       return queryToken(token1);
@@ -109,7 +38,7 @@ const App = () => {
     .then((response) => addressToken1 = response)
     .then(() => fetchData(addressToken0, addressToken1)).then((response) => {
 
-      setPairData([{
+      setPairData((previousData) => [{
           id: response.pools[0].id,
           token0: response.pools[0].token0.symbol,
           token0Decimals: response.pools[0].token0.decimals,
@@ -118,9 +47,10 @@ const App = () => {
           fees: formatNumbers0Decimals(response.pools[0].poolDayData[0].volumeUSD * (response.pools[0].feeTier / 10000) / 100),
           volume: formatNumbers0Decimals(response.pools[0].poolDayData[0].volumeUSD),
           tvl: formatNumbers0Decimals(response.pools[0].totalValueLockedUSD),
-        }]);
+        },
+      ...previousData]);
 
-      decimalsDiff = Math.abs(parseFloat(response.pools[0].token0.decimals,) - parseFloat(response.pools[0].token1.decimals,));
+      decimalsDiff = Math.abs(parseFloat(response.pools[0].token0.decimals) - parseFloat(response.pools[0].token1.decimals));
 
       return queryTicks(response.pools[0].id);
 
@@ -145,8 +75,7 @@ const App = () => {
       const tvl2 = calcTvl(response[1].liquidityGross);
       const tvl3 = calcTvl(response[2].liquidityGross);
 
-      setPairData((previousData) => {
-        return [{
+      setPairData((previousData) => [{
           ...previousData[0],
           ranges: {
             range_1: {
@@ -169,18 +98,19 @@ const App = () => {
             }
           }
         }]
-      });
-      setIsLoading(false);
+        );
+      
+        setIsLoading(false);
     });
   }
 
   return (
     <React.Fragment>
       <Header />
-      <PairInput onQueryingToken={queryTokens} />
+      <PairInput onQueryingPairData={queryPairData} />
       {!isLoading && pairData.map((pairData) => <StratData key={`${pairData.id}`} pairData={pairData} />)}
-      {isLoading && <p>Press the button to load data</p>}
-      <InfoHelper />
+      {isLoading && <SimpleParagraph mainText="Start querying data now " subText=" (ex: token0 - DAI / token1 - USDC)" />}
+      {!isLoading && <InfoHelper />}
       <Footer />
     </React.Fragment>
   );

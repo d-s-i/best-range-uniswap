@@ -1,0 +1,9 @@
+.paragraph {
+    display: flex;
+    justify-content: center;
+    font-size: 1.3em; 
+}
+
+.sub-text {
+    color: #666666;
+}
