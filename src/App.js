@@ -9,6 +9,7 @@ import InfoHelper from "./components/StratData/InfoHelper";
 import Footer from "./components/Footer/Footer";
 import PairInput from "./components/StratData/PairInput/PairInput";
 import SimpleParagraph from "./components/UI/SimpleParagraph";
+import DisplayError from "./components/UI/DisplayError";
 
 const App = () => {
 
@@ -29,9 +30,9 @@ const App = () => {
   const calcUpperTick = (tickIdx, decimalsDiff) => 1.0001**(parseFloat(tickIdx) + 10) * BigNumber(10**(decimalsDiff));
   const calcTvl = (liquidity) => BigNumber(liquidity) / BigNumber(10**15);
 
-  const isPoolDisplayed = (poolAddress) => pairData.map(pair => pair.id).includes(poolAddress) ? true : false;
+  const isPoolDisplayed = (poolAddress) => pairData.map(pair => pair.id).includes(poolAddress);
   const handlerTokenNotFound = (responseArray) => {
-    if(responseArray.length === 0 ) throw new Error("One of the token hasn't been found. Make sure tokens are rightly written in CAPS if needed (see Uniswap pool).");
+    if(responseArray.length === 0 ) throw new Error("One of the token hasn't been found. Make sure tokens symbols are rightly written in CAPS if needed (see Uniswap pool).");
   }
   const handlerPoolNotFound = (poolAddress) => {
     if (poolAddress.length === 0) throw new Error("This pool doesn't exist. Make sure the pool exist and that your token0 is indeed token0 and not token1 or vice versa.");
@@ -55,7 +56,7 @@ const App = () => {
     })
     .then((response) => {
       handlerPoolNotFound(response.pools);
-      if(isPoolDisplayed(response.pools)) throw new Error("You already queried this pool");
+      if(isPoolDisplayed(response.pools[0].id)) throw new Error("You already queried this pool");
       return fetchData(response.pools[0].id);
     })
     .then((response) => {
@@ -116,7 +117,10 @@ const App = () => {
       setIsWelcome(false);
       setIsError(() => [false, ""]);
 
-    }).catch(error => setIsError(() => [true, `${error}`]));
+    }).catch(error => {
+      setIsLoading(false);
+      setIsError(() => [true, `${error}`])
+    });
   }
 
   const deletePairHandler = (id) => {
@@ -132,14 +136,16 @@ const App = () => {
     }
   }
 
+  const deleteErrorHandler = () => setIsError(() => [false, ""]);
+
   return (
     <React.Fragment>
       <Header />
       <PairInput onQueryingPairData={queryPairData} />
+      {isError[0] && <DisplayError error={isError[1]} onDeleteError={deleteErrorHandler} ></DisplayError>} 
       {!isLoading && pairData.map((pairData) => <StratData key={`${pairData.id}`} pairData={pairData} onDelete={deletePairHandler} />)}
       {isWelcome && !isError[0] && <SimpleParagraph mainText="Start querying data now" subText="(ex: token0 - DAI / token1 - USDC)" />}
       {isLoading && !isError[0] && <SimpleParagraph mainText="Loading" subText="Wait a few seconds ..." />}
-      {isError[0] && <SimpleParagraph mainText={isError[1]} className="error" />}
       {!isLoading && !isWelcome && <InfoHelper />}
       <Footer />
     </React.Fragment>

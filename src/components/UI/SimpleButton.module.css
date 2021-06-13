@@ -4,13 +4,8 @@
     font-weight: bold;
 }
 
-.delete-button {
-    background: red;
-}
-
 .button:hover {
     cursor: pointer;
 }
-
 
 
